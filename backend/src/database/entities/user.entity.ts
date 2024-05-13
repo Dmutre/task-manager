@@ -9,7 +9,7 @@ import {
 import { Task } from './task.entity';
 
 export enum UserRole {
-  BODD = 'BOSS',
+  BOSS = 'BOSS',
   EMPLOYEE = 'EMPLOYEE',
 }
 
