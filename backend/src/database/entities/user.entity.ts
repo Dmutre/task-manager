@@ -25,10 +25,13 @@ export class User {
   @Column({ type: 'varchar', unique: true })
   email: string;
 
+  @Column({ type: 'bool', default: false })
+  emailApproved: boolean;
+
   @Column({ type: 'varchar' })
   password: string;
 
-  @Column({ type: 'enum', enum: UserRole })
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.EMPLOYEE })
   role: UserRole;
 
   @ManyToOne(() => User, (user) => user.children, { nullable: true })

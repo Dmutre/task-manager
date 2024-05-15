@@ -22,5 +22,6 @@ import { Task } from './entities/task.entity';
       }),
     }),
   ],
+  exports: [TypeOrmModule]
 })
 export class DatabaseModule {}

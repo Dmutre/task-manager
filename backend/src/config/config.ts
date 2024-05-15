@@ -8,5 +8,8 @@ export default () => ({
     db_user: process.env.DATABASE_USER,
     db_type: process.env.DATABASE_TYPE,
   },
-  jwt: {},
+  jwt: {
+    jwt_secret: process.env.JWT_SECRET,
+    jwt_refresh_ttl: process.env.JWT_REFRESH_TTL,
+  },
 });
