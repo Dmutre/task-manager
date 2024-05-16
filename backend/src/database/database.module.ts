@@ -4,6 +4,7 @@ import ConfigurationModule from 'src/config/configuration.module';
 import DatabaseConfigService from 'src/config/database-config';
 import { User } from './entities/user.entity';
 import { Task } from './entities/task.entity';
+import { Token } from './entities/token.entity';
 
 @Module({
   imports: [
@@ -17,7 +18,7 @@ import { Task } from './entities/task.entity';
         username: configService.db_user,
         password: configService.db_password,
         database: configService.db_name,
-        entities: [User, Task],
+        entities: [User, Task, Token],
         synchronize: true,
       }),
     }),

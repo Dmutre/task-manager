@@ -7,6 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Task } from './task.entity';
+import { Token } from './token.entity';
 
 export enum UserRole {
   BOSS = 'BOSS',
@@ -42,4 +43,7 @@ export class User {
 
   @OneToMany(() => Task, (task) => task.user)
   tasks: Task[];
+
+  @OneToMany(() => Token, (token) => token.user)
+  tokens: Token[];
 }
