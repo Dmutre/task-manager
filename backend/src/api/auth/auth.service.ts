@@ -4,23 +4,23 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/database/entities/user.entity';
+import { User } from '../../database/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDTO } from './dto/create-user.dto';
-import { UserAlreadyExistsException } from 'src/utils/exceptions/UserAlreadyExcistException';
+import { UserAlreadyExistsException } from '../../utils/exceptions/UserAlreadyExcistException';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import JwtConfiguration from 'src/config/jwt-config';
+import JwtConfiguration from '../../config/jwt-config';
 import { EmailDTO } from './dto/email.dto';
 import * as uuid from 'uuid';
-import { Token } from 'src/database/entities/token.entity';
-import FrontendConfiguration from 'src/config/frontend-config';
-import { MailService } from 'src/mail/mail.service';
+import { Token } from '../../database/entities/token.entity';
+import FrontendConfiguration from '../../config/frontend-config';
+import { MailService } from '../../mail/mail.service';
 import { TokenDTO } from './dto/token.dto';
-import { HOUR } from 'src/utils/consts';
+import { HOUR } from '../../utils/consts';
 import { LogInDTO } from './dto/log-in.dto';
-import { JwtPayload } from 'src/security/JwtPayload';
-import { Tokens } from 'src/utils/types/tokens.type';
+import { JwtPayload } from '../../security/JwtPayload';
+import { Tokens } from '../../utils/types/tokens.type';
 
 @Injectable()
 export default class AuthService {
@@ -78,7 +78,7 @@ export default class AuthService {
     return this.getTokens(user);
   }
 
-  getTokens(user: User): { accessToken: string; refreshToken: string } {
+  private getTokens(user: User): { accessToken: string; refreshToken: string } {
     const payload = {
       sub: user.id,
       email: user.email,
@@ -93,7 +93,7 @@ export default class AuthService {
     };
   }
 
-  async hashPassword(password: string): Promise<string> {
+  private async hashPassword(password: string): Promise<string> {
     const salt = 7;
     return bcrypt.hash(password, salt);
   }
@@ -130,7 +130,7 @@ export default class AuthService {
 
     if (!token) throw new BadRequestException('Invalid token');
 
-    if (new Date().getUTCDate() - token.createdAt.getTime() > HOUR)
+    if (Date.now() - token.createdAt.getTime() > HOUR)
       throw new BadRequestException(
         'Token has expired, repeat the email verification request process',
       );

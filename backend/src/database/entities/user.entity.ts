@@ -36,14 +36,14 @@ export class User {
   role: UserRole;
 
   @ManyToOne(() => User, (user) => user.children, { nullable: true })
-  boss: User;
+  boss?: User;
 
   @OneToMany(() => User, (user) => user.boss)
-  children: User[];
+  children?: User[];
 
   @OneToMany(() => Task, (task) => task.user)
-  tasks: Task[];
+  tasks?: Task[];
 
   @OneToMany(() => Token, (token) => token.user)
-  tokens: Token[];
+  tokens?: Token[];
 }
