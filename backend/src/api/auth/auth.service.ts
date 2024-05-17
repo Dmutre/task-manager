@@ -1,19 +1,26 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/database/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { UserAlreadyExistsException } from 'src/utils/exceptions/UserAlreadyExcistException';
 import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcrypt'
+import * as bcrypt from 'bcrypt';
 import JwtConfiguration from 'src/config/jwt-config';
 import { EmailDTO } from './dto/email.dto';
-import * as uuid from 'uuid'
+import * as uuid from 'uuid';
 import { Token } from 'src/database/entities/token.entity';
 import FrontendConfiguration from 'src/config/frontend-config';
 import { MailService } from 'src/mail/mail.service';
 import { TokenDTO } from './dto/token.dto';
 import { HOUR } from 'src/utils/consts';
+import { LogInDTO } from './dto/log-in.dto';
+import { JwtPayload } from 'src/security/JwtPayload';
+import { Tokens } from 'src/utils/types/tokens.type';
 
 @Injectable()
 export default class AuthService {
@@ -36,14 +43,17 @@ export default class AuthService {
     if (!user.emailApproved)
       throw new UnauthorizedException('Email is not approved');
 
-    if(!await this.comparePasswords(password, user.password))
+    if (!(await this.comparePasswords(password, user.password)))
       throw new BadRequestException('Email or password is wrong');
 
     delete user.password;
     return user;
   }
-  
-  private comparePasswords(password: string, hashPassword: string): Promise<boolean> {
+
+  private comparePasswords(
+    password: string,
+    hashPassword: string,
+  ): Promise<boolean> {
     return bcrypt.compare(password, hashPassword);
   }
 
@@ -56,8 +66,8 @@ export default class AuthService {
   }
 
   async createUser(data: CreateUserDTO) {
-    if(await this.userExists(data.email)) {
-      throw new UserAlreadyExistsException()
+    if (await this.userExists(data.email)) {
+      throw new UserAlreadyExistsException();
     }
 
     data.password = await this.hashPassword(data.password);
@@ -68,7 +78,7 @@ export default class AuthService {
     return this.getTokens(user);
   }
 
-  getTokens (user: User): { accessToken: string, refreshToken: string } {
+  getTokens(user: User): { accessToken: string; refreshToken: string } {
     const payload = {
       sub: user.id,
       email: user.email,
@@ -83,17 +93,16 @@ export default class AuthService {
     };
   }
 
-  async hashPassword (password: string): Promise<string> {
+  async hashPassword(password: string): Promise<string> {
     const salt = 7;
     return bcrypt.hash(password, salt);
   }
 
   async requestEmailVerification(data: EmailDTO) {
     const user = await this.userRepo.findOneBy({ email: data.email });
-    if(!user)
-      throw new UnauthorizedException()
+    if (!user) throw new UnauthorizedException();
 
-    if(user.emailApproved)
+    if (user.emailApproved)
       throw new BadRequestException('User email is already epproved');
 
     const tokenValue = uuid.v4();
@@ -107,24 +116,64 @@ export default class AuthService {
       link: `${this.frontendConfig.url}/verify/${token.value}`,
     });
 
-    return { message: 'We send you the confirmation email. Please wait and confirm your email' }
+    return {
+      message:
+        'We send you the confirmation email. Please wait and confirm your email',
+    };
   }
 
   async verifyEmail(data: TokenDTO) {
-    const token = await this.tokenRepo.findOne({ 
+    const token = await this.tokenRepo.findOne({
       where: { value: data.token },
-      relations: ['user']
-     });
+      relations: ['user'],
+    });
 
-    if(!token) 
-      throw new BadRequestException('Invalid token');
+    if (!token) throw new BadRequestException('Invalid token');
 
-    if(new Date().getUTCDate() - token.createdAt.getTime() > HOUR)
-      throw new BadRequestException('Token has expired, repeat the email verification request process')
+    if (new Date().getUTCDate() - token.createdAt.getTime() > HOUR)
+      throw new BadRequestException(
+        'Token has expired, repeat the email verification request process',
+      );
 
     await this.userRepo.update(token.user.id, { emailApproved: true });
     await this.tokenRepo.delete(token);
 
-    return { message: 'Your email has been successfuly verified. You can login in our app' };
+    return {
+      message:
+        'Your email has been successfuly verified. You can login in our app',
+    };
+  }
+
+  async loginUser(data: LogInDTO) {
+    const user = await this.userRepo.findOneBy({ email: data.email });
+
+    if (!user) throw new UnauthorizedException();
+
+    if (!user.emailApproved)
+      throw new UnauthorizedException('Email is not verified');
+
+    if (!(await this.comparePasswords(data.password, user.password)))
+      throw new BadRequestException('Invalid email or password');
+
+    return this.getTokens(user);
+  }
+
+  private async verifyToken(token: string): Promise<JwtPayload> {
+    try {
+      return await this.jwtService.verify(token);
+    } catch (error) {
+      throw new UnauthorizedException();
+    }
+  }
+
+  async refreshTokens(refreshToken: string): Promise<Tokens> {
+    if (!refreshToken) throw new UnauthorizedException();
+
+    const payload: JwtPayload = await this.verifyToken(refreshToken);
+    const user: User = await this.findUser(payload.sub);
+
+    if (!user) throw new UnauthorizedException();
+
+    return await this.getTokens(user);
   }
 }

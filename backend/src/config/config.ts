@@ -18,6 +18,6 @@ export default () => ({
     password: process.env.SMTP_PASSWORD,
   },
   frontend: {
-    url: process.env.FRONTEND_BASE_URL
-  }
+    url: process.env.FRONTEND_BASE_URL,
+  },
 });

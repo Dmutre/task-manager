@@ -1,5 +1,11 @@
-import { Column, CreateDateColumn, Entity, Generated, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { User } from "./user.entity";
+import {
+  Column,
+  Entity,
+  Generated,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { User } from './user.entity';
 
 @Entity()
 export class Token {
@@ -13,6 +19,6 @@ export class Token {
   @ManyToOne(() => User, (user) => user.tokens)
   user: User;
 
-  @Column({ type: "timestamp", default: new Date() })
+  @Column({ type: 'timestamp', default: new Date() })
   createdAt: Date;
 }

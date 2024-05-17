@@ -16,7 +16,7 @@ async function bootstrap() {
     new ValidationPipe({
       transform: true,
       whitelist: true,
-    })
+    }),
   );
 
   const config = new DocumentBuilder()

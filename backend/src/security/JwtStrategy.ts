@@ -10,7 +10,7 @@ import JwtConfiguration from 'src/config/jwt-config';
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly authService: AuthService,
-    private readonly jwtConfig: JwtConfiguration
+    private readonly jwtConfig: JwtConfiguration,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),

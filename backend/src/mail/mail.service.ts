@@ -5,11 +5,9 @@ import { resolve } from 'path';
 
 @Injectable()
 export class MailService {
-  constructor (
-    private mailer: MailerService,
-  ) {}
+  constructor(private mailer: MailerService) {}
 
-  async send ({ to, subject, message, link }: MailOptionsDTO): Promise<void> {
+  async send({ to, subject, message, link }: MailOptionsDTO): Promise<void> {
     await this.mailer.sendMail({
       to,
       subject,

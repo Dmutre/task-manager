@@ -23,6 +23,6 @@ import { Token } from './entities/token.entity';
       }),
     }),
   ],
-  exports: [TypeOrmModule]
+  exports: [TypeOrmModule],
 })
 export class DatabaseModule {}

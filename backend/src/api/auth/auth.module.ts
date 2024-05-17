@@ -25,7 +25,7 @@ import { MailModule } from 'src/mail/mail.module';
         global: true,
         secret: configservice.jwt_secret,
         signOptions: { expiresIn: configservice.jwt_refresh_ttl },
-      })
+      }),
     }),
   ],
   controllers: [AuthController],

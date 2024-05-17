@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { MailerModule } from '@nestjs-modules/mailer';
-import * as process from 'process';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { MailService } from './mail.service';
@@ -18,8 +17,8 @@ import SMTPConfiguration from 'src/config/smtp-config';
           secure: false,
           auth: {
             user: configService.username,
-            pass: configService.password
-          }
+            pass: configService.password,
+          },
         },
         defaults: {
           from: 'Approve your email <noreply@spdload-task.com>',
@@ -30,8 +29,8 @@ import SMTPConfiguration from 'src/config/smtp-config';
           options: {
             strict: true,
           },
-        }
-      })
+        },
+      }),
     }),
   ],
   providers: [MailService],
