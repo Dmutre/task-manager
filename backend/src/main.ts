@@ -8,7 +8,7 @@ import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const configService = new ConfigService();
 
-  const PORT = configService.get<number>('port');
+  const PORT = configService.get<number>('port') || 3000;
 
   const app = await NestFactory.create(AppModule);
 

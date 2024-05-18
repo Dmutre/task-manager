@@ -72,7 +72,7 @@ export default class AuthService {
 
     data.password = await this.hashPassword(data.password);
 
-    const user = await this.userRepo.create(data);
+    const user = this.userRepo.create(data);
     await this.userRepo.save(user);
 
     return this.getTokens(user);
@@ -106,7 +106,7 @@ export default class AuthService {
       throw new BadRequestException('User email is already epproved');
 
     const tokenValue = uuid.v4();
-    const token = await this.tokenRepo.create({ value: tokenValue, user });
+    const token = this.tokenRepo.create({ value: tokenValue, user });
     await this.tokenRepo.save(token);
 
     await this.mailService.send({
@@ -174,6 +174,6 @@ export default class AuthService {
 
     if (!user) throw new UnauthorizedException();
 
-    return await this.getTokens(user);
+    return this.getTokens(user);
   }
 }

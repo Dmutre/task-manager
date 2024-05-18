@@ -9,7 +9,6 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import JwtConfiguration from '../../config/jwt-config';
 import FrontendConfiguration from '../../config/frontend-config';
 import { MailService } from '../../mail/mail.service';
-import { throwError } from 'rxjs';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 
 describe('AuthService', () => {
@@ -17,9 +16,20 @@ describe('AuthService', () => {
   let jwtServiceMock: JwtService;
   let userRepositoryMock: Repository<User>;
   let tokenRepositoryMock: Repository<Token>;
-  const mockUser: User = { id: '1', email: 'test@example.com', password: 'password', emailApproved: true, role: UserRole.BOSS, username: 'TestUser' };
-  const expiredToken = { id: '2', value: 'expired_token', createdAt: new Date('2022-01-01T00:00:00.000Z'), user: mockUser };
-
+  const mockUser: User = {
+    id: '1',
+    email: 'test@example.com',
+    password: 'password',
+    emailApproved: true,
+    role: UserRole.BOSS,
+    username: 'TestUser',
+  };
+  const expiredToken = {
+    id: '2',
+    value: 'expired_token',
+    createdAt: new Date('2022-01-01T00:00:00.000Z'),
+    user: mockUser,
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -78,7 +88,9 @@ describe('AuthService', () => {
     service = module.get<AuthService>(AuthService);
     jwtServiceMock = module.get<JwtService>(JwtService);
     userRepositoryMock = module.get<Repository<User>>(getRepositoryToken(User));
-    tokenRepositoryMock = module.get<Repository<Token>>(getRepositoryToken(Token));
+    tokenRepositoryMock = module.get<Repository<Token>>(
+      getRepositoryToken(Token),
+    );
   });
 
   afterEach(() => {
@@ -90,33 +102,39 @@ describe('AuthService', () => {
   });
 
   it('should validate user', async () => {
-
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
 
-    const result = await service.validateUser(mockUser.email, mockUser.password);
+    const result = await service.validateUser(
+      mockUser.email,
+      mockUser.password,
+    );
     expect(result).toEqual(mockUser);
   });
 
   it('should throw a BadRequestException', async () => {
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
-    await expect(service.validateUser(mockUser.email, mockUser.password)).rejects.toThrow(BadRequestException);
+    await expect(
+      service.validateUser(mockUser.email, mockUser.password),
+    ).rejects.toThrow(BadRequestException);
   });
-  
+
   it('should throw an UnauthorizedException', async () => {
     jest.spyOn(userRepositoryMock, 'findOneBy').mockResolvedValue(null);
     jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
-    await expect(service.validateUser(mockUser.email, mockUser.password)).rejects.toThrow(UnauthorizedException);
+    await expect(
+      service.validateUser(mockUser.email, mockUser.password),
+    ).rejects.toThrow(UnauthorizedException);
   });
 
   it('should return user', async () => {
     const user = await service.findUser('1');
-    expect(user).toEqual(mockUser)
+    expect(user).toEqual(mockUser);
   });
 
   it('should create user', async () => {
     jest.spyOn(userRepositoryMock, 'findOneBy').mockResolvedValue(null);
     jest.spyOn(bcrypt, 'hash').mockResolvedValue(mockUser.password);
-  
+
     const tokens = await service.createUser(mockUser);
     expect(await tokens.accessToken).toEqual('token');
     expect(await tokens.refreshToken).toEqual('token');
@@ -125,26 +143,33 @@ describe('AuthService', () => {
   it('should throw UnauthorizedException if user is not found during email verification', async () => {
     jest.spyOn(userRepositoryMock, 'findOneBy').mockResolvedValue(null);
 
-    await expect(service.requestEmailVerification({ email: 'test@example.com' })).rejects.toThrow(UnauthorizedException);
+    await expect(
+      service.requestEmailVerification({ email: 'test@example.com' }),
+    ).rejects.toThrow(UnauthorizedException);
   });
 
   it('should throw BadRequestException if user email is already approved during email verification', async () => {
     const existingUser = { ...mockUser, emailApproved: true };
     jest.spyOn(userRepositoryMock, 'findOneBy').mockResolvedValue(existingUser);
 
-    await expect(service.requestEmailVerification({ email: 'test@example.com' })).rejects.toThrow(BadRequestException);
+    await expect(
+      service.requestEmailVerification({ email: 'test@example.com' }),
+    ).rejects.toThrow(BadRequestException);
   });
 
   it('should throw BadRequestException if token is invalid during email verification', async () => {
     jest.spyOn(tokenRepositoryMock, 'findOne').mockResolvedValue(null);
-  
-    await expect(service.verifyEmail({ token: 'invalid_token' })).rejects.toThrow(BadRequestException);
-  });
-  
-  it('should throw BadRequestException if token has expired during email verification', async () => {
-    jest.spyOn(tokenRepositoryMock, 'findOne').mockResolvedValue(expiredToken);
-  
-    await expect(service.verifyEmail({ token: 'expired_token' })).rejects.toThrow(BadRequestException);
+
+    await expect(
+      service.verifyEmail({ token: 'invalid_token' }),
+    ).rejects.toThrow(BadRequestException);
   });
 
+  it('should throw BadRequestException if token has expired during email verification', async () => {
+    jest.spyOn(tokenRepositoryMock, 'findOne').mockResolvedValue(expiredToken);
+
+    await expect(
+      service.verifyEmail({ token: 'expired_token' }),
+    ).rejects.toThrow(BadRequestException);
+  });
 });
