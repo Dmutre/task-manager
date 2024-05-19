@@ -29,12 +29,10 @@ export class TaskService {
     return this.taskRepository.findOneBy({ id });
   }
 
-  update(id: string, data: UpdateTaskDto): Promise<Task> {
-    const task = this.taskRepository.findOneBy({ id });
-    return this.taskRepository.save({
-      ...task,
-      ...data,
-    });
+  async update(id: string, data: UpdateTaskDto): Promise<Task> {
+    const task = await this.taskRepository.findOneBy({ id });
+    task.status = data.status;
+    return this.taskRepository.save(task);
   }
 
   async delete(id: string): Promise<Task> {
