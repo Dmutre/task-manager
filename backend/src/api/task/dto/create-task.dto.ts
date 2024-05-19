@@ -7,17 +7,17 @@ export class CreateTaskDto {
 
   @IsString()
   @IsOptional()
-  description: string;
+  description?: string;
 
   @IsEnum(TaskStatus)
   @IsOptional()
-  status: TaskStatus;
+  status?: TaskStatus;
 
   @IsDate()
   @IsOptional()
-  startDate: Date;
+  startDate?: Date;
 
   @IsDate()
   @IsOptional()
-  endDate: Date;
+  endDate?: Date;
 }
