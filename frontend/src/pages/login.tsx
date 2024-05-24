@@ -1,17 +1,24 @@
 import { useNavigate } from "react-router";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
-import { response } from "express";
+import { Form, Input, Radio, Button } from "antd";
+
+enum Role {
+  Boss = "boss",
+  User = "user",
+}
+
+type LoginValues = {
+  username: string;
+  email: string;
+  password: string;
+  role: Role;
+};
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const formData = new FormData(event.currentTarget);
-    const username = formData.get("username") as string;
-    const email = formData.get("email") as string;
-    const password = formData.get("password") as string;
-    const role = formData.get("role") as string;
+  const onFinish = (values: LoginValues) => {
+    const { username, email, password, role } = values;
     console.log({ username, email, password, role });
     axios
       .post(`${SERVER_URL}/auth/signup`, {
@@ -22,6 +29,7 @@ export const Login: React.FC = () => {
       })
       .then((response) => {
         console.log(response);
+        navigate("/");
       });
   };
   return (
@@ -33,28 +41,40 @@ export const Login: React.FC = () => {
         height: "100vh",
       }}
     >
-      <form onSubmit={(e) => handleSubmit(e)}>
-        <label>
-          Username:
-          <input type="text" name="username" />
-        </label>
-        <label>
-          Email:
-          <input type="text" name="email" />
-        </label>
-        <label>
-          Password:
-          <input type="password" name="password" />
-        </label>
-        <fieldset>
-          <legend>Role:</legend>
-          <input type="radio" name="role" value="boss" />
-          <label>Boss</label>
-          <input type="radio" name="role" value="user" />
-          <label>User</label>
-        </fieldset>
-        <button type="submit">Submit</button>
-      </form>
+      <Form onFinish={onFinish}>
+        <Form.Item<LoginValues>
+          name="username"
+          label="Username"
+          rules={[{ required: true }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item<LoginValues>
+          name="email"
+          label="Email"
+          rules={[{ required: true, type: "email" }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item<LoginValues>
+          name="password"
+          label="Password"
+          rules={[{ required: true }]}
+        >
+          <Input.Password />
+        </Form.Item>
+        <Form.Item<LoginValues> name="role" label="Role">
+          <Radio.Group>
+            <Radio value="boss">Boss</Radio>
+            <Radio value="user">User</Radio>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+        </Form.Item>
+      </Form>
     </div>
   );
 };
