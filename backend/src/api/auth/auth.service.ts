@@ -176,4 +176,8 @@ export default class AuthService {
 
     return this.getTokens(user);
   }
+
+  getEmployee(bossId) {
+    return this.userRepo.find({ where: { boss: {id: bossId}}, select: ['id', 'email', 'role','username', 'tasks'] });
+  }
 }
