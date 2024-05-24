@@ -17,7 +17,10 @@ import { TokenDTO } from './dto/token.dto';
 import { LogInDTO } from './dto/log-in.dto';
 import { Request } from 'express';
 import { UserResponse } from './response/user.response';
-import { JwtGuard } from 'src/security/JwtGuard';
+import { JwtGuard } from 'src/security/jwt.guard';
+import { User, UserRole } from 'src/database/entities/user.entity';
+import { RoleGuard } from 'src/security/role.guard';
+import { AllowedRoles } from 'src/security/decorators/role.decorator';
 
 @ApiTags('Authorization')
 @Controller('auth')
@@ -76,6 +79,17 @@ export default class AuthController {
     );
     response.cookie('refresh_token', tokens.refreshToken, { httpOnly: true });
     return { access_token: tokens.accessToken };
+  }
+
+  @Get('/boos/employee')
+  @UseGuards(JwtGuard, RoleGuard)
+  @AllowedRoles(UserRole.BOSS)
+  @ApiOkResponse({ type: [User] })
+  @ApiOperation({ description: 'Get all employee of the boss' })
+  getEmplayee(
+    @Req() request,
+  ) {
+    return this.authService.getEmployee(request.user.id)
   }
 
   @UseGuards(JwtGuard)

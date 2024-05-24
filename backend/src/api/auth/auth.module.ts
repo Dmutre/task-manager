@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import AuthController from './auth.controller';
 import AuthService from './auth.service';
-import { JwtGuard } from 'src/security/JwtGuard';
+import { JwtGuard } from 'src/security/jwt.guard';
 import { JwtStrategy } from 'src/security/JwtStrategy';
-import { LocalAuthGuard } from 'src/security/LocalGuard';
+import { LocalAuthGuard } from 'src/security/local.guard';
 import { LocalStrategy } from 'src/security/LocalStrategy';
 import { JwtModule } from '@nestjs/jwt';
 import ConfigurationModule from 'src/config/configuration.module';

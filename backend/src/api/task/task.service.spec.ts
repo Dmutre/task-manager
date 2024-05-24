@@ -10,6 +10,7 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 describe('TaskService', () => {
   let service: TaskService;
   let taskRepositoryMock: Repository<Task>;
+  let userRepoMock: Repository<User>
 
   const mockTask: Task = {
     id: '1',
@@ -38,6 +39,14 @@ describe('TaskService', () => {
     remove: jest.fn().mockResolvedValue(mockTask),
   };
 
+  const mockUserRepo = {
+    create: jest.fn().mockReturnValue(mockUser),
+    save: jest.fn().mockResolvedValue(mockUser),
+    find: jest.fn().mockResolvedValue([mockUser]),
+    findOneBy: jest.fn().mockResolvedValue(mockUser),
+    remove: jest.fn().mockResolvedValue(mockUser),
+  }
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -46,11 +55,16 @@ describe('TaskService', () => {
           provide: getRepositoryToken(Task),
           useValue: mockTaskRepository,
         },
+        {
+          provide: getRepositoryToken(User),
+          useValue: mockUserRepo,
+        },
       ],
     }).compile();
 
     service = module.get<TaskService>(TaskService);
     taskRepositoryMock = module.get<Repository<Task>>(getRepositoryToken(Task));
+    userRepoMock = module.get<Repository<User>>(getRepositoryToken(User))
   });
 
   it('should be defined', () => {
@@ -63,6 +77,7 @@ describe('TaskService', () => {
       description: 'description',
       startDate: new Date(),
       endDate: new Date(),
+      userId: '1'
     };
 
     const result = await service.create(createTaskDto, mockUser);
@@ -76,7 +91,7 @@ describe('TaskService', () => {
   });
 
   it('should return all tasks', async () => {
-    const result = await service.findAll();
+    const result = await service.findAllUsersTask('1');
     expect(taskRepositoryMock.find).toHaveBeenCalled();
     expect(result).toEqual([mockTask]);
   });

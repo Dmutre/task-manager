@@ -13,10 +13,12 @@ import { TaskService } from './task.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
-import { JwtGuard } from '../../security/JwtGuard';
-import { User } from '../../database/entities/user.entity';
+import { JwtGuard } from '../../security/jwt.guard';
+import { User, UserRole } from '../../database/entities/user.entity';
 import { Task } from '../../database/entities/task.entity';
 import { TaskResponse } from './response/task.response';
+import { RoleGuard } from 'src/security/role.guard';
+import { AllowedRoles } from 'src/security/decorators/role.decorator';
 
 @ApiTags('Task')
 @Controller('task')
@@ -24,7 +26,8 @@ export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
-  @UseGuards(JwtGuard)
+  @UseGuards(JwtGuard, RoleGuard)
+  @AllowedRoles(UserRole.BOSS)
   @ApiOkResponse({ type: TaskResponse })
   @ApiOperation({ summary: 'Create task' })
   create(
@@ -35,13 +38,25 @@ export class TaskController {
   }
 
   @Get()
+  @UseGuards(JwtGuard)
   @ApiOkResponse({ type: [TaskResponse] })
   @ApiOperation({ summary: 'Get all tasks' })
-  findAll(): Promise<Task[]> {
-    return this.taskService.findAll();
+  findAll(
+    @Req() request,
+  ): Promise<Task[]> {
+    return this.taskService.findAllUsersTask(request.user.id);
   }
 
-  @Get(':id')
+  @Get('/boss')
+  @UseGuards(JwtGuard, RoleGuard)
+  @AllowedRoles(UserRole.BOSS)
+  getAllBossTasks (
+    @Req() request
+  ) {
+    return this.taskService.getAllTasks(request.user.id)
+  }
+
+  @Get('/:id')
   @UseGuards(JwtGuard)
   @ApiOkResponse({ type: TaskResponse })
   @ApiOperation({ summary: 'Get task by id' })
@@ -49,7 +64,7 @@ export class TaskController {
     return this.taskService.findOne(id);
   }
 
-  @Patch(':id')
+  @Patch('/:id')
   @UseGuards(JwtGuard)
   @ApiOkResponse({ type: TaskResponse })
   @ApiOperation({ summary: 'Update task' })
@@ -57,8 +72,9 @@ export class TaskController {
     return this.taskService.update(id, body);
   }
 
-  @Delete(':id')
-  @UseGuards(JwtGuard)
+  @Delete('/:id')
+  @UseGuards(JwtGuard, RoleGuard)
+  @AllowedRoles(UserRole.BOSS)
   @ApiOkResponse({ type: TaskResponse })
   @ApiOperation({ summary: 'Delete task' })
   delete(@Param('id') id: string): Promise<Task> {
