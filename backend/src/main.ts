@@ -10,7 +10,9 @@ async function bootstrap() {
 
   const PORT = configService.get<number>('port') || 3000;
 
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    cors: true,
+  });
 
   app.useGlobalPipes(
     new ValidationPipe({

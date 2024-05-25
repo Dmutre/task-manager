@@ -4,8 +4,8 @@ import { SERVER_URL } from "../constants";
 import { Form, Input, Radio, Button } from "antd";
 
 enum Role {
-  Boss = "boss",
-  User = "user",
+  Boss = "BOSS",
+  Employee = "EMPLOYEE",
 }
 
 type LoginValues = {
@@ -65,8 +65,8 @@ export const Login: React.FC = () => {
         </Form.Item>
         <Form.Item<LoginValues> name="role" label="Role">
           <Radio.Group>
-            <Radio value="boss">Boss</Radio>
-            <Radio value="user">User</Radio>
+            <Radio value={Role.Boss}>Boss</Radio>
+            <Radio value={Role.Employee}>User</Radio>
           </Radio.Group>
         </Form.Item>
         <Form.Item>
