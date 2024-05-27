@@ -11,6 +11,7 @@ import {
 } from "../constants";
 
 import { LogoutOutlined, PlusOutlined } from "@ant-design/icons";
+import { Task } from "./tasks";
 
 export type User = {
   id: string;
@@ -22,13 +23,14 @@ export type User = {
 
 export type Employee = Omit<User, "role"> & { role: Role.EMPLOYEE };
 
+type SelectedEmployee = Employee & { tasks: Task[] | null };
+
 export type Boss = Omit<User, "role"> & { role: Role.BOSS };
 
 export const Boss: React.FC = () => {
   const navigate = useNavigate();
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
-    null
-  );
+  const [selectedEmployee, setSelectedEmployee] =
+    useState<SelectedEmployee | null>(null);
   const [isAddingEmployee, setIsAddingEmployee] = useState<boolean>(false);
   const [employees, setEmployees] = useState<Employee[]>([]);
   useEffect(() => {
@@ -70,7 +72,14 @@ export const Boss: React.FC = () => {
   ];
 
   const openAssignTaskModal = (employee: Employee) => {
-    setSelectedEmployee(employee);
+    axios
+      .get(`${SERVER_URL}/tasks/${employee.id}`)
+      .then((response) => {
+        setSelectedEmployee({ ...employee, tasks: response.data });
+      })
+      .catch(() => {
+        setSelectedEmployee({ ...employee, tasks: null });
+      });
   };
 
   const closeAssignTaskModal = () => {
