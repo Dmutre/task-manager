@@ -1,12 +1,7 @@
 import { useNavigate } from "react-router";
 import axios from "axios";
-import { SERVER_URL } from "../constants";
+import { SERVER_URL, TOKEN_LOCALSTORAGE_KEY } from "../constants";
 import { Form, Input, Button } from "antd";
-
-export enum Role {
-  BOSS = "BOSS",
-  EMPLOYEE = "EMPLOYEE",
-}
 
 type LoginValues = {
   email: string;
@@ -17,14 +12,15 @@ export const Login: React.FC = () => {
   const navigate = useNavigate();
   const onFinish = (values: LoginValues) => {
     const { email, password } = values;
-    console.log({ email, password });
     axios
       .post(`${SERVER_URL}/auth/login`, {
         email,
         password,
       })
       .then((response) => {
-        console.log(response);
+        const accessToken = response.data.access_token;
+        localStorage.setItem(TOKEN_LOCALSTORAGE_KEY, accessToken);
+        navigate("/");
       });
   };
   return (
