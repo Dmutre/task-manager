@@ -205,7 +205,7 @@ export const Boss: React.FC = () => {
         </div>
       </Modal>
       <Modal
-        okText="Add Employee"
+        footer={null}
         open={isAddingEmployee}
         onCancel={closeAddEmployeeModal}
       >
