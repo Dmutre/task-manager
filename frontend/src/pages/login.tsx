@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router";
 import axios from "axios";
 import { SERVER_URL } from "../constants";
-import { Form, Input, Radio, Button } from "antd";
+import { Form, Input, Button } from "antd";
 
 export enum Role {
   BOSS = "BOSS",
@@ -9,27 +9,22 @@ export enum Role {
 }
 
 type LoginValues = {
-  username: string;
   email: string;
   password: string;
-  role: Role;
 };
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
   const onFinish = (values: LoginValues) => {
-    const { username, email, password, role } = values;
-    console.log({ username, email, password, role });
+    const { email, password } = values;
+    console.log({ email, password });
     axios
-      .post(`${SERVER_URL}/auth/signup`, {
-        username,
+      .post(`${SERVER_URL}/auth/login`, {
         email,
         password,
-        role,
       })
       .then((response) => {
         console.log(response);
-        navigate("/");
       });
   };
   return (
@@ -42,13 +37,6 @@ export const Login: React.FC = () => {
       }}
     >
       <Form onFinish={onFinish}>
-        <Form.Item<LoginValues>
-          name="username"
-          label="Username"
-          rules={[{ required: true }]}
-        >
-          <Input />
-        </Form.Item>
         <Form.Item<LoginValues>
           name="email"
           label="Email"
@@ -63,17 +51,22 @@ export const Login: React.FC = () => {
         >
           <Input.Password />
         </Form.Item>
-        <Form.Item<LoginValues> name="role" label="Role">
-          <Radio.Group>
-            <Radio value={Role.BOSS}>Boss</Radio>
-            <Radio value={Role.EMPLOYEE}>User</Radio>
-          </Radio.Group>
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Submit
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            width: "100%",
+          }}
+        >
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Login
+            </Button>
+          </Form.Item>
+          <Button type="link" onClick={() => navigate("/signUp")}>
+            Sign Up
           </Button>
-        </Form.Item>
+        </div>
       </Form>
     </div>
   );

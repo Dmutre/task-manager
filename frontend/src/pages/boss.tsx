@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Role } from "./login";
+import { Role } from "./signUp";
 import { Card, Modal } from "antd";
 import Title from "antd/es/typography/Title";
 import { useState } from "react";
