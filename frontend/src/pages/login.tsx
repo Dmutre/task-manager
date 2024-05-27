@@ -3,9 +3,9 @@ import axios from "axios";
 import { SERVER_URL } from "../constants";
 import { Form, Input, Radio, Button } from "antd";
 
-enum Role {
-  Boss = "boss",
-  User = "user",
+export enum Role {
+  BOSS = "BOSS",
+  EMPLOYEE = "EMPLOYEE",
 }
 
 type LoginValues = {
@@ -65,8 +65,8 @@ export const Login: React.FC = () => {
         </Form.Item>
         <Form.Item<LoginValues> name="role" label="Role">
           <Radio.Group>
-            <Radio value="boss">Boss</Radio>
-            <Radio value="user">User</Radio>
+            <Radio value={Role.BOSS}>Boss</Radio>
+            <Radio value={Role.EMPLOYEE}>User</Radio>
           </Radio.Group>
         </Form.Item>
         <Form.Item>
