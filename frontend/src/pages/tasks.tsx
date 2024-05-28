@@ -28,7 +28,7 @@ export enum TaskStatus {
 }
 
 export type Task = {
-  id: number;
+  id: string;
   title: string;
   description: string;
   status: TaskStatus;
@@ -42,15 +42,17 @@ export const Tasks: React.FC = () => {
   const formRef = useRef<FormInstance<Task>>();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isAddingTask, setIsAddingTask] = useState<boolean>(false);
+  const [isEditingTask, setIsEditingTask] = useState<false | string>(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const openModal = () => {
+  const openCreateModal = () => {
     setIsAddingTask(true);
   };
 
   const closeModal = () => {
     setIsAddingTask(false);
+    setIsEditingTask(false);
   };
 
   const handleCreateTask = async (values: Task) => {
@@ -64,9 +66,6 @@ export const Tasks: React.FC = () => {
 
     const startDate = dayjs(values.startDate).toDate();
     const endDate = dayjs(values.endDate).toDate();
-
-    console.log("Start Date:", startDate, "Type:", typeof startDate);
-    console.log("End Date:", endDate, "Type:", typeof endDate);
 
     const newTaskValues = {
       ...values,
@@ -85,6 +84,77 @@ export const Tasks: React.FC = () => {
       closeModal();
     } catch (error) {
       console.error("Error during task creation:", error);
+    }
+    formRef.current?.resetFields();
+  };
+
+  const handleEditTask = async (values: Task) => {
+    const token = localStorage.getItem(TOKEN_LOCALSTORAGE_KEY);
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    const startDate = dayjs(values.startDate).toDate();
+    const endDate = dayjs(values.endDate).toDate();
+
+    const updatedTask = {
+      ...values,
+      startDate,
+      endDate,
+    };
+
+    try {
+      const response = await axios.patch(
+        `${SERVER_URL}/task/${isEditingTask}`,
+        updatedTask,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setTasks(
+        tasks.map((task) =>
+          task.id === response.data.id ? response.data : task
+        )
+      );
+      closeModal();
+    } catch (error) {
+      console.error("Error during task update:", error);
+    }
+    formRef.current?.resetFields();
+  };
+
+  const openEditModal = (task: Task) => {
+    setIsEditingTask(task.id);
+    formRef.current?.setFieldsValue({
+      title: task.title,
+      description: task.description,
+      status: task.status,
+      startDate: dayjs(task.startDate),
+      endDate: dayjs(task.endDate),
+    });
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    const token = localStorage.getItem(TOKEN_LOCALSTORAGE_KEY);
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      await axios.delete(`${SERVER_URL}/task/${taskId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setTasks(tasks.filter((task) => task.id !== taskId));
+    } catch (error) {
+      console.error("Error during task deletion:", error);
     }
   };
 
@@ -147,7 +217,7 @@ export const Tasks: React.FC = () => {
             gap: 10,
           }}
         >
-          <Button onClick={openModal}>Add Task</Button>
+          <Button onClick={openCreateModal}>Add Task</Button>
           <Button onClick={handleLogout}>Logout</Button>
         </div>
       </header>
@@ -171,20 +241,48 @@ export const Tasks: React.FC = () => {
             <p>{task.status}</p>
             <p>Start date: {dayjs(task.startDate).format("YYYY-MM-DD")}</p>
             <p>End date: {dayjs(task.endDate).format("YYYY-MM-DD")}</p>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                gap: 10,
+              }}
+            >
+              <Button
+                type="primary"
+                onClick={() => {
+                  openEditModal(task);
+                }}
+              >
+                Edit
+              </Button>
+              <Button
+                type="primary"
+                danger
+                onClick={() => handleDeleteTask(task.id)}
+              >
+                Delete
+              </Button>
+            </div>
           </Card>
         ))}
       </div>
-      <Modal open={isAddingTask} onCancel={closeModal}>
+      <Modal
+        open={isAddingTask || isEditingTask !== false}
+        onCancel={closeModal}
+        footer={null}
+      >
         <Form<Task>
           ref={formRef as LegacyRef<FormInstance<Task>>}
-          onFinish={handleCreateTask}
+          onFinish={isAddingTask ? handleCreateTask : handleEditTask}
+          style={{ marginTop: 20 }}
         >
           <Form.Item
             label="Title"
             name="title"
             rules={[{ required: true, message: "Please input the title!" }]}
           >
-            <Input />
+            <Input disabled={!isAddingTask} />
           </Form.Item>
           <Form.Item
             label="Description"
@@ -193,7 +291,7 @@ export const Tasks: React.FC = () => {
               { required: true, message: "Please input the description!" },
             ]}
           >
-            <Input.TextArea />
+            <Input.TextArea disabled={!isAddingTask} />
           </Form.Item>
           <Form.Item
             label="Status"
@@ -216,18 +314,18 @@ export const Tasks: React.FC = () => {
               { required: true, message: "Please select the start date!" },
             ]}
           >
-            <DatePicker />
+            <DatePicker disabled={!isAddingTask} />
           </Form.Item>
           <Form.Item
             label="End Date"
             name="endDate"
             rules={[{ required: true, message: "Please select the end date!" }]}
           >
-            <DatePicker />
+            <DatePicker disabled={!isAddingTask} />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Create Task
+              {isAddingTask ? "Create Task" : "Update Task"}
             </Button>
           </Form.Item>
         </Form>
