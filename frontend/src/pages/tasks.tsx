@@ -62,16 +62,16 @@ export const Tasks: React.FC = () => {
       return;
     }
 
-    const startDate = dayjs(values.startDate).toISOString();
-    const endDate = dayjs(values.endDate).toISOString();
+    const startDate = dayjs(values.startDate).toDate();
+    const endDate = dayjs(values.endDate).toDate();
 
     console.log("Start Date:", startDate, "Type:", typeof startDate);
     console.log("End Date:", endDate, "Type:", typeof endDate);
 
     const newTaskValues = {
       ...values,
-      startDate: startDate,
-      endDate: endDate,
+      startDate,
+      endDate,
       userId: userID,
     };
 
