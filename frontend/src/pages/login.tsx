@@ -31,7 +31,6 @@ export const Login: React.FC = () => {
             const role = response.data.role;
             localStorage.setItem("role", role);
             if (role === Role.BOSS) {
-              console.log("boss");
               navigate("/boss");
             } else if (role === Role.EMPLOYEE) {
               navigate("/tasks");

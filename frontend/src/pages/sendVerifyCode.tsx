@@ -6,7 +6,6 @@ import { Spin } from "antd";
 export const SendVerifyCode: React.FC = () => {
   const navigate = useNavigate();
   const { token } = useParams();
-  console.log(token);
 
   axios
     .post(`${SERVER_URL}/auth/email/verify`, { token: token })

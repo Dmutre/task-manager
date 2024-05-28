@@ -19,7 +19,6 @@ export const SignUp: React.FC = () => {
   const navigate = useNavigate();
   const onFinish = (values: SignUpValues) => {
     const { username, email, password, role } = values;
-    console.log({ username, email, password, role });
     axios
       .post(`${SERVER_URL}/auth/signup`, {
         username,
@@ -32,8 +31,6 @@ export const SignUp: React.FC = () => {
           .post(`${SERVER_URL}/auth/email/request-verification`, { email })
           .then((response) => {
             navigate("/verification");
-            console.log("email: ", email);
-            console.log(response);
           });
       });
   };
