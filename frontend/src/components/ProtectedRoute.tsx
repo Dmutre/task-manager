@@ -5,6 +5,7 @@ import {
   ROLE_LOCALSTORAGE_KEY,
   SERVER_URL,
   TOKEN_LOCALSTORAGE_KEY,
+  USER_ID_LOCALSTORAGE_KEY,
 } from "../constants";
 
 const ProtectedRoute = ({
@@ -36,7 +37,9 @@ const ProtectedRoute = ({
         });
 
         const role = response.data.role;
+        const userId = response.data.id;
         localStorage.setItem(ROLE_LOCALSTORAGE_KEY, role);
+        localStorage.setItem(USER_ID_LOCALSTORAGE_KEY, userId);
 
         if (roles.includes(role)) {
           setIsAuthenticated(true);

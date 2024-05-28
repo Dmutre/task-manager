@@ -2,6 +2,7 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { SERVER_URL, TOKEN_LOCALSTORAGE_KEY } from "../constants";
 import { Form, Input, Button } from "antd";
+import { Role } from "./signUp";
 
 type LoginValues = {
   email: string;
@@ -20,7 +21,24 @@ export const Login: React.FC = () => {
       .then((response) => {
         const accessToken = response.data.access_token;
         localStorage.setItem(TOKEN_LOCALSTORAGE_KEY, accessToken);
-        navigate("/");
+        axios
+          .get(`${SERVER_URL}/auth/me`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          })
+          .then((response) => {
+            const role = response.data.role;
+            localStorage.setItem("role", role);
+            if (role === Role.BOSS) {
+              console.log("boss");
+              navigate("/boss");
+            } else if (role === Role.EMPLOYEE) {
+              navigate("/tasks");
+            } else {
+              console.error("role not found");
+            }
+          });
       });
   };
   return (
