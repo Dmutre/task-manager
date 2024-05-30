@@ -1,4 +1,4 @@
-import { IsDate, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { TaskStatus } from '../../../database/entities/task.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -18,12 +18,12 @@ export class CreateTaskDto {
   status?: TaskStatus;
 
   @ApiProperty({ description: 'Start date of the task' })
-  @IsDate()
+  @IsDateString()
   @IsOptional()
   startDate?: Date;
 
   @ApiProperty({ description: 'End date of the task' })
-  @IsDate()
+  @IsDateString()
   @IsOptional()
   endDate?: Date;
 
