@@ -1,2 +1,5 @@
 # task-manager
-Task manager with boss and employee entities
+Task manager oriented for bosses and emplayees. 
+Boss can give task with title, description and time estimation to an employee. Employee can complete task and update it`s status. Service include role system, jwt authorization, swagger documentation, UI design, comfortable interface and email verification. On backend I user pnpm to have goodly balanced package instalation. The app is tested, connected and tested.
+
+Every installation process is described in README.md files into each directory
